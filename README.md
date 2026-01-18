@@ -1,97 +1,51 @@
 # QuantumAlpha Capital
 
-An elite algorithmic trading platform powered by advanced AI and quantum-inspired market analysis. QuantumAlpha Capital delivers institutional-grade automated trading with sophisticated risk management and neural decision-making for cryptocurrency perpetual futures.
+A Python-based algorithmic trading platform for cryptocurrency perpetual futures on Hyperliquid exchange. Features AI-powered market analysis, real-time technical indicators, and automated trade execution with risk management.
 
 ---
 
-## 🚀 Overview
+## Features
 
-QuantumAlpha Capital represents the next generation of algorithmic trading technology. Our platform combines cutting-edge artificial intelligence with quantum-inspired market analysis to deliver consistent alpha generation across volatile cryptocurrency markets. Built for sophisticated traders who demand institutional-grade performance with retail accessibility.
+- **Automated Trading**: Systematic trade execution on Hyperliquid perpetual futures
+- **AI Integration**: Multiple LLM providers (OpenRouter) for market analysis and decision making
+- **Technical Analysis**: Real-time RSI, MACD, EMA indicators via TAAPI.io
+- **Risk Management**: Position sizing, stop-loss, take-profit automation
+- **GUI Dashboard**: Real-time portfolio monitoring with live charts
+- **Multi-Asset Support**: BTC, ETH, LTC perpetual futures trading
 
-### Elite Features
+## Architecture
 
-- **🧠 Neural Market Intelligence**: Advanced AI models (GPT-4, Claude, DeepSeek) for market analysis
-- **⚡ Quantum Signal Processing**: Multi-dimensional technical analysis with confidence scoring
-- **🎯 Dynamic Portfolio Optimization**: Modern portfolio theory with real-time risk adjustment
-- **🔄 Systematic Alpha Generation**: Bidirectional strategies across all market conditions
-- **📊 Institutional Analytics**: Professional-grade performance tracking and risk metrics
-- **🖥️ Elite Dashboard**: Real-time portfolio monitoring with advanced visualizations
+### Core Components
 
----
+- **Market Processor** (`src/backend/bot_engine.py`): Main trading loop with 5-minute cycles
+- **Decision Engine** (`src/backend/agent/decision_maker.py`): AI-powered trade signal generation
+- **Exchange API** (`src/backend/trading/hyperliquid_api.py`): Hyperliquid integration
+- **GUI Interface** (`src/gui/`): NiceGUI-based dashboard with real-time updates
+- **Technical Analysis** (`src/backend/indicators/`): TAAPI.io client with caching
 
-## 🏗️ Architecture
+### Data Flow
 
-### Core Systems
+```
+TAAPI.io → Technical Indicators → AI Analysis → Trade Signals → Hyperliquid Execution
+    ↓              ↓                    ↓            ↓              ↓
+Market Data → Portfolio State → GUI Dashboard → User Interface → Trade Management
+```
 
-1. **Quantum Market Processor** (`src/backend/bot_engine.py`)
-   - Neural decision synthesis with 5-minute precision cycles
-   - Multi-asset portfolio management and execution
-   - Real-time performance optimization and risk control
+## Installation
 
-2. **Neural Decision Engine** (`src/backend/agent/decision_maker.py`)
-   - Advanced AI integration for systematic market analysis
-   - Dynamic indicator synthesis during decision processes
-   - Structured alpha generation with confidence metrics
+### Requirements
 
-3. **Exchange Integration** (`src/backend/trading/hyperliquid_api.py`)
-   - Enterprise-grade Hyperliquid API integration
-   - Sophisticated retry logic and error recovery
-   - Professional order management and execution
-
-4. **Elite Dashboard** (`src/gui/`)
-   - Real-time portfolio visualization and analytics
-   - Advanced risk management interface
-   - Professional-grade performance monitoring
-
----
-
-## 📈 Alpha Generation Strategies
-
-### 1. **Quantum Momentum Capture**
-- **Objective**: Systematic early entry on confirmed directional moves
-- **Indicators**: Neural EMA analysis, MACD momentum, volume confirmation
-- **Execution**: 7-10x leverage on high-probability systematic signals
-- **Risk**: Dynamic stop-loss with 2:1 minimum risk/reward optimization
-
-### 2. **High-Frequency Alpha Extraction**
-- **Objective**: Rapid profit capture on 1-3% price movements
-- **Indicators**: RSI divergence, micro-trend analysis, volatility patterns
-- **Execution**: Ultra-fast entry/exit with precision timing
-- **Risk**: Minimal exposure with systematic profit harvesting
-
-### 3. **Systematic Swing Optimization**
-- **Objective**: Multi-day trend capture with advanced position management
-- **Indicators**: Multi-timeframe alignment, Fibonacci levels, volume analysis
-- **Execution**: Scaled entries with dynamic position sizing
-- **Risk**: Trailing stops with systematic profit scaling
-
-### 4. **Volatility Arbitrage**
-- **Objective**: Alpha generation during high-volatility market regimes
-- **Indicators**: ATR expansion, breakout patterns, market microstructure
-- **Execution**: Enhanced leverage during confirmed volatility spikes
-- **Risk**: Rapid profit taking with volatility-adjusted stops
-
-### 5. **Neural Bidirectional System**
-- **Bull Markets**: Systematic dip acquisition with momentum confirmation
-- **Bear Markets**: Strategic bounce distribution with trend validation
-- **Range Markets**: Breakout positioning with directional bias detection
-
----
-
-## 🔧 Installation & Configuration
-
-### Prerequisites
-- Python 3.9+ with advanced libraries
+- Python 3.9+
 - Hyperliquid account with API access
-- OpenRouter credits for AI model access
+- OpenRouter API key for AI models
 - TAAPI.io subscription for technical indicators
 
-### Quick Start
+### Setup
 
-1. **Clone QuantumAlpha Platform**
+1. **Clone Repository**
    ```bash
-   git clone <your-repository-url>
-   cd quantumalpha-capital
+   git clone https://github.com/LoopGlitch26/QuantumAlpha-Capital.git
+   cd QuantumAlpha-Capital
    ```
 
 2. **Install Dependencies**
@@ -99,146 +53,126 @@ QuantumAlpha Capital represents the next generation of algorithmic trading techn
    pip install -r requirements.txt
    ```
 
-3. **Configure API Access**
+3. **Configure Environment**
    ```bash
    cp .env.example .env
-   # Configure your API keys and trading parameters
+   # Edit .env with your API keys
    ```
 
-4. **Launch Platform**
+4. **Run Application**
    ```bash
    python main.py
    ```
 
-### Professional Configuration
+## Configuration
+
+### Environment Variables
 
 ```env
-# QuantumAlpha Capital Configuration
-INSTRUMENTS=BTC ETH LTC                    # Trading universe
-ANALYSIS_TIMEFRAME=5m                      # Neural analysis frequency
+# Trading Configuration
+INSTRUMENTS=BTC ETH LTC                    # Assets to trade
+ANALYSIS_TIMEFRAME=5m                      # Analysis frequency
 EXECUTION_MODE=systematic                  # systematic/manual
-AI_MODEL=deepseek/deepseek-chat-v3.1      # Neural engine selection
+AI_MODEL=deepseek/deepseek-chat-v3.1      # AI model selection
 
-# API Integration
-HYPERLIQUID_PRIVATE_KEY=your_key          # Trading execution
+# API Keys
+HYPERLIQUID_PRIVATE_KEY=your_key          # Trading wallet private key
 OPENROUTER_API_KEY=your_key               # AI model access
-TAAPI_API_KEY=your_key                    # Technical analysis
+TAAPI_API_KEY=your_key                    # Technical analysis data
 
-# Risk Management
-MAX_POSITION_ALLOCATION=0.4               # 40% maximum per position
-LEVERAGE_CEILING=10                       # Maximum leverage limit
-RISK_TERMINATION_THRESHOLD=0.02           # 2% maximum risk per trade
+# Network
+HYPERLIQUID_NETWORK=mainnet               # mainnet/testnet
 ```
 
----
+### Trading Parameters
 
-## 📊 Performance Analytics
+- **Position Sizing**: Configurable allocation per asset
+- **Leverage**: 1-10x leverage on perpetual futures
+- **Risk Management**: Stop-loss and take-profit automation
+- **Execution Modes**: Systematic (auto) or manual approval
 
-### Institutional Metrics
-- **Alpha Generation**: Risk-adjusted returns above benchmark
-- **Sharpe Optimization**: Volatility-adjusted performance measurement
-- **Maximum Drawdown**: Peak-to-trough risk assessment
-- **Win Ratio**: Systematic profitability percentage
-- **Profit Factor**: Gross profit to gross loss optimization
+## Technical Specifications
 
-### Real-Time Monitoring
-- Live portfolio value and performance tracking
-- Open position management with risk metrics
-- Execution history with detailed analytics
-- Market intelligence and neural reasoning logs
+### AI Models Supported
 
----
+- DeepSeek Chat V3.1 (recommended)
+- OpenAI GPT-4/GPT-4o
+- Anthropic Claude 3.5
+- Google Gemini Pro
+- Meta Llama models
 
-## 🔒 Enterprise Security
+### Technical Indicators
 
-### Capital Protection
-- Segregated API wallets for trading operations
-- Local encryption for all sensitive credentials
-- No cloud data transmission except trading APIs
-- Professional risk management protocols
+- **Trend**: EMA 20/50 (5m and 4h timeframes)
+- **Momentum**: RSI 7/14, MACD
+- **Volatility**: ATR 3/14
+- **Volume**: Real-time volume analysis
 
-### Risk Controls
-- Dynamic position sizing with volatility adjustment
-- Systematic stop-loss and take-profit management
-- Emergency liquidation capabilities
-- Real-time risk monitoring and alerts
+### Exchange Features
 
----
+- **Hyperliquid Perpetuals**: BTC-USD, ETH-USD, LTC-USD
+- **Order Types**: Market, limit orders
+- **Position Management**: Long/short positions
+- **Real-time Data**: WebSocket price feeds
 
-## 🎯 Advanced Features
+## GUI Dashboard
 
-### Neural Intelligence
-- Multi-model AI integration (GPT-4, Claude, DeepSeek, Gemini)
-- Dynamic model selection based on market conditions
-- Custom systematic prompts for alpha generation
-- Tool-calling for real-time market data synthesis
+### Components
 
-### Systematic Execution
-- AI-generated trade proposals with risk assessment
-- Manual approval workflow for capital preservation
-- Detailed reasoning and market analysis for each decision
-- Professional-grade execution with institutional precision
+- **Portfolio Metrics**: Balance, PnL, Sharpe ratio, active positions
+- **Technical Charts**: Price, RSI, MACD with real-time updates
+- **Position Management**: Open positions with risk metrics
+- **Trade Proposals**: AI-generated recommendations with approval workflow
+- **Market Intelligence**: Multi-asset price and indicator data
 
-### Platform Extensibility
-- Modular architecture for strategy customization
-- Plugin system for additional indicators and models
-- Multi-exchange support framework (extensible)
-- Custom risk management rule implementation
+### Update Frequencies
 
----
+- **Main Dashboard**: 3-second refresh cycle
+- **Technical Charts**: 1-second updates
+- **Market Data**: 5-minute collection cycle
 
-## 📈 Backtesting Results
+## Development
 
-Elite performance across multiple market conditions:
+### Project Structure
 
-| Strategy | Alpha Generation | Sharpe Ratio | Max Drawdown | Win Rate |
-|----------|------------------|--------------|--------------|----------|
-| Quantum Momentum | +127.3% | 1.8 | -6.2% | 71% |
-| Alpha Extraction | +89.7% | 2.1 | -4.1% | 78% |
-| Swing Optimization | +156.2% | 1.6 | -9.8% | 64% |
-| Volatility Arbitrage | +94.5% | 1.9 | -7.3% | 69% |
-| **Combined System** | **+142.8%** | **1.9** | **-5.7%** | **73%** |
+```
+src/
+├── backend/
+│   ├── agent/           # AI decision making
+│   ├── core/            # Portfolio optimization
+│   ├── indicators/      # Technical analysis
+│   ├── trading/         # Exchange integration
+│   └── utils/           # Helper functions
+├── gui/
+│   ├── components/      # Reusable UI widgets
+│   ├── pages/           # Dashboard pages
+│   ├── services/        # Data services
+│   └── themes/          # UI styling
+└── database/            # Data persistence
+```
 
----
+### Key Dependencies
 
-## 🤝 Professional Support
+- **NiceGUI**: Web-based GUI framework
+- **aiohttp**: Async HTTP client for APIs
+- **plotly**: Interactive charting
+- **sqlite3**: Local data storage
+- **cryptography**: Wallet operations
 
-### Documentation
-- [TRADING_STRATEGIES.md](TRADING_STRATEGIES.md) - Advanced strategy implementation
-- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical system architecture
-- [SETUP.md](SETUP.md) - Professional installation guide
+## Risk Warnings
 
-### Community
-- GitHub Issues - Technical support and feature requests
-- Professional Discussions - Strategy optimization and market analysis
+- **Financial Risk**: Cryptocurrency trading involves substantial risk of loss
+- **API Security**: Protect your private keys and API credentials
+- **Testing**: Use testnet for initial testing and development
+- **Capital**: Only trade with funds you can afford to lose
 
-### External Integration
-- [Hyperliquid Documentation](https://hyperliquid.gitbook.io/) - Exchange API reference
-- [OpenRouter Models](https://openrouter.ai/models) - AI model specifications
-- [TAAPI Indicators](https://taapi.io/indicators/) - Technical analysis reference
+## License
 
----
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## ⚠️ Professional Disclaimers
+## Documentation
 
-### Investment Risk Notice
-- **Cryptocurrency trading involves substantial financial risk**
-- **Past performance does not guarantee future alpha generation**
-- **Only deploy capital you can afford to lose completely**
-- **Begin with conservative position sizing and systematic testing**
-
-### Platform Liability
-- QuantumAlpha Capital software provided "as is" without warranty
-- Users maintain full responsibility for trading decisions and outcomes
-- Developers assume no liability for financial losses or system failures
-- Professional risk management and due diligence required
-
----
-
-## 🏆 QuantumAlpha Advantage
-
-**Institutional Technology. Retail Accessibility. Systematic Alpha.**
-
-QuantumAlpha Capital bridges the gap between institutional trading technology and retail market access. Our quantum-inspired algorithms and neural decision-making deliver consistent alpha generation while maintaining professional-grade risk management.
-
-*Experience the future of algorithmic trading with QuantumAlpha Capital.*
+- [SETUP.md](SETUP.md) - Detailed installation guide
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture
+- [TRADING_STRATEGIES.md](TRADING_STRATEGIES.md) - Strategy documentation
+- [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) - Security guidelines
