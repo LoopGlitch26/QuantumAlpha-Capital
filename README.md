@@ -2,8 +2,8 @@
 
 A Python-based algorithmic trading platform for cryptocurrency perpetual futures on Hyperliquid exchange. Features AI-powered market analysis, real-time technical indicators, and automated trade execution with risk management.
 
-<img width="1512" height="982" alt="Screenshot 2026-01-19 at 12 55 12 AM" src="https://github.com/user-attachments/assets/558e5dc5-2fe0-4462-af80-04f6394207f4" />
-<img width="1512" height="982" alt="Screenshot 2026-01-19 at 12 55 20 AM" src="https://github.com/user-attachments/assets/950fb988-1629-4dce-92e4-19f62ee6bcb7" />
+<img width="1512" height="982" alt="Screenshot 2026-01-19 at 7 20 01 AM" src="https://github.com/user-attachments/assets/09a6b381-292f-4f55-98e7-3634783d3b95" />
+<img width="1512" height="982" alt="Screenshot 2026-01-19 at 7 20 08 AM" src="https://github.com/user-attachments/assets/a4778bd8-bb18-4abc-b86f-6c27dd036eeb" />
 
 ---
 
