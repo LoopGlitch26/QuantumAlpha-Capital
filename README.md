@@ -179,3 +179,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Technical architecture
 - [TRADING_STRATEGIES.md](TRADING_STRATEGIES.md) - Strategy documentation
 - [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) - Security guidelines
+
