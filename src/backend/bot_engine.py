@@ -532,7 +532,7 @@ class QuantumMarketProcessor:
                                     await asyncio.sleep(1)
                                     recent_fills_check = await self.hyperliquid.get_recent_fills(limit=5)
                                     filled = any(
-                                        f.get('coin') == asset and
+                                        f.get('coin') == instrument and
                                         abs(float(f.get('sz', 0)) - amount) < 0.0001
                                         for f in recent_fills_check
                                     )
@@ -549,7 +549,7 @@ class QuantumMarketProcessor:
                                             )
                                             oids = self.hyperliquid.extract_oids(tp_order)
                                             tp_oid = oids[0] if oids else None
-                                            self.logger.info(f"Placed TP order for {asset} @ {tp_price}")
+                                            self.logger.info(f"Placed TP order for {instrument} @ {tp_price}")
                                         except Exception as e:
                                             self.logger.error(f"Failed to place TP: {e}")
 
@@ -561,7 +561,7 @@ class QuantumMarketProcessor:
                                             )
                                             oids = self.hyperliquid.extract_oids(sl_order)
                                             sl_oid = oids[0] if oids else None
-                                            self.logger.info(f"Placed SL order for {asset} @ {sl_price}")
+                                            self.logger.info(f"Placed SL order for {instrument} @ {sl_price}")
                                         except Exception as e:
                                             self.logger.error(f"Failed to place SL: {e}")
 

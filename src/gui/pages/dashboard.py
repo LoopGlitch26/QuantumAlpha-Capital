@@ -13,7 +13,8 @@ from src.gui.services.state_manager import StateManager
 # Import modular components - using try/except for graceful fallback
 try:
     from src.gui.components.charts_widget import (
-        create_portfolio_charts, 
+        create_equity_chart,
+        create_allocation_chart, 
         create_technical_chart, 
         update_portfolio_charts, 
         update_technical_chart
@@ -79,7 +80,7 @@ def create_dashboard(agent_service: AgentService, state_manager: StateManager):
                     ui.label('Portfolio Value').classes('text-xl font-bold text-white mb-2')
                     
                     if MODULAR_COMPONENTS_AVAILABLE:
-                        equity_chart, allocation_chart = create_portfolio_charts()
+                        equity_chart = create_equity_chart()
                     else:
                         # Fallback implementation
                         equity_chart = ui.plotly(go.Figure(
@@ -106,7 +107,9 @@ def create_dashboard(agent_service: AgentService, state_manager: StateManager):
                 with ui.card().classes('flex-1 p-4'):
                     ui.label('Asset Allocation').classes('text-xl font-bold text-white mb-2')
                     
-                    if not MODULAR_COMPONENTS_AVAILABLE:
+                    if MODULAR_COMPONENTS_AVAILABLE:
+                        allocation_chart = create_allocation_chart()
+                    else:
                         # Fallback implementation
                         allocation_chart = ui.plotly(go.Figure(
                             data=[go.Pie(
@@ -889,7 +892,7 @@ def create_dashboard(agent_service: AgentService, state_manager: StateManager):
     _last_technical_update = None
     _technical_cache = {}
 
-    async def update_technical_chart(market_data):
+    async def update_technical_chart_optimized(market_data):
         """OPTIMIZED: Update technical analysis chart with faster performance"""
         nonlocal _last_technical_update, _technical_cache
         

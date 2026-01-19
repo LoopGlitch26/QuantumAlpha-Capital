@@ -8,6 +8,51 @@ from nicegui import ui
 import datetime
 
 
+def create_equity_chart():
+    """Create just the equity chart"""
+    return ui.plotly(go.Figure(
+        data=[go.Scatter(
+            x=[],
+            y=[],
+            mode='lines',
+            name='Value',
+            line=dict(color='#667eea', width=3)
+        )],
+        layout=go.Layout(
+            template='plotly_dark',
+            height=300,
+            margin=dict(l=50, r=20, t=20, b=40),
+            xaxis=dict(title='Time', showgrid=True, gridcolor='#374151'),
+            yaxis=dict(title='Value ($)', showgrid=True, gridcolor='#374151'),
+            paper_bgcolor='#1f2937',
+            plot_bgcolor='#1f2937',
+            font=dict(color='#e5e7eb')
+        )
+    )).classes('w-full')
+
+
+def create_allocation_chart():
+    """Create just the allocation chart"""
+    return ui.plotly(go.Figure(
+        data=[go.Pie(
+            labels=[],
+            values=[],
+            hole=0.4,
+            marker=dict(colors=['#667eea', '#764ba2', '#f093fb', '#4facfe'])
+        )],
+        layout=go.Layout(
+            template='plotly_dark',
+            height=300,
+            margin=dict(l=20, r=20, t=20, b=20),
+            paper_bgcolor='#1f2937',
+            plot_bgcolor='#1f2937',
+            font=dict(color='#e5e7eb'),
+            showlegend=True,
+            legend=dict(orientation='v', x=1, y=0.5)
+        )
+    )).classes('w-full')
+
+
 def create_portfolio_charts():
     """Create portfolio value and allocation charts"""
     
