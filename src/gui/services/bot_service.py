@@ -443,7 +443,19 @@ class AgentService:
         Callback when system alert occurs.
         Adds alert to activity feed.
         """
-        self._add_event(f"ALERT: {alert}", level="error")
+        # Determine message level based on content
+        if "error" in alert.lower() or "failed" in alert.lower():
+            level = "error"
+        elif "warning" in alert.lower():
+            level = "warning"
+        else:
+            level = "info"
+            
+        # Remove "ALERT:" prefix for trading decisions and system messages
+        if any(keyword in alert for keyword in ["HOLD", "BUY", "SELL", "Executed", "Multi-analyst"]):
+            self._add_event(alert, level=level)
+        else:
+            self._add_event(f"ALERT: {alert}", level=level)
 
     def _add_event(self, message: str, level: str = "info"):
         """Add event to recent events feed"""

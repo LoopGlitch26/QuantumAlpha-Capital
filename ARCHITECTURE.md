@@ -21,8 +21,8 @@ This document provides a comprehensive technical overview of the QuantumAlpha Ca
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
 │           │                     │                     │         │
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐ │
-│  │   Database      │  │   AI Agent      │  │   Risk Mgmt     │ │
-│  │  (SQLAlchemy)   │  │  (LLM Client)   │  │  (Position)     │ │
+│  │   Database      │  │ Multi-Analyst   │  │   Risk Mgmt     │ │
+│  │  (SQLAlchemy)   │  │    System       │  │  (Position)     │ │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -35,6 +35,7 @@ This document provides a comprehensive technical overview of the QuantumAlpha Ca
 
 The heart of the system, responsible for:
 - **Main Trading Loop**: 5-minute interval execution cycle
+- **Multi-Analyst Integration**: Coordinates 4-specialist ensemble system
 - **State Management**: Account, positions, and market data tracking
 - **Order Execution**: Market orders with stop-loss/take-profit
 - **Performance Tracking**: Real-time P&L and analytics
@@ -60,18 +61,97 @@ class QuantumMarketProcessor:
    ↓
 2. Gather Market Data (prices, indicators, funding)
    ↓  
-3. Build AI Context (structured data for LLM)
+3. Multi-Analyst Analysis (4 specialists + judge consensus)
    ↓
-4. Get AI Decision (trade recommendations)
+4. Build AI Context (structured data for LLM)
    ↓
-5. Execute Trades (market orders + risk management)
+5. Get Final Decision (consensus trade recommendations)
    ↓
-6. Update State (positions, performance, logs)
+6. Execute Trades (market orders + risk management)
    ↓
-7. Sleep Until Next Interval (5 minutes default)
+7. Update State (positions, performance, logs)
+   ↓
+8. Sleep Until Next Interval (5 minutes default)
 ```
 
-### 2. **AI Decision Maker** (`src/backend/agent/decision_maker.py`)
+### 2. **Multi-Analyst System** (`src/backend/analysts/`)
+
+Advanced ensemble intelligence system with 4 specialized analysts:
+
+#### System Architecture
+
+```
+Market Data → [Technical] [ML] [Risk] [Quant] → Judge → Final Decision
+                ↓        ↓     ↓      ↓         ↓
+              Price    AI    Risk   Stats    Consensus
+             Action  Models  Mgmt  Models    Reasoning
+```
+
+#### Analyst Specializations
+
+```python
+class TechnicalAnalyst:
+    """Price action, chart patterns, technical indicators"""
+    def analyze_market(self, market_data) -> AnalystRecommendation:
+        # RSI, MACD, EMA analysis
+        # Support/resistance levels
+        # Chart pattern recognition
+        
+class MLAnalyst:
+    """Machine learning models and AI-based predictions"""
+    def analyze_market(self, market_data) -> AnalystRecommendation:
+        # Predictive modeling
+        # Pattern recognition
+        # Sentiment analysis
+        
+class RiskAnalyst:
+    """Risk management and position sizing"""
+    def analyze_market(self, market_data) -> AnalystRecommendation:
+        # Portfolio risk assessment
+        # Position sizing optimization
+        # Drawdown protection
+        
+class QuantAnalyst:
+    """Statistical models and market microstructure"""
+    def analyze_market(self, market_data) -> AnalystRecommendation:
+        # Statistical arbitrage
+        # Market microstructure analysis
+        # Quantitative signals
+```
+
+#### Judge System
+
+```python
+class MarketJudge:
+    """Evaluates analyst recommendations and determines consensus"""
+    def evaluate_recommendations(self, recommendations) -> JudgeDecision:
+        # Confidence weighting
+        # Consensus building
+        # Risk-adjusted decision making
+        # Market condition adaptation
+```
+
+#### Integration Flow
+
+```python
+# Multi-analyst decision process
+async def get_multi_analyst_decision(market_data):
+    # 1. Parallel analyst evaluation
+    recommendations = await asyncio.gather(
+        technical_analyst.analyze_market(market_data),
+        ml_analyst.analyze_market(market_data),
+        risk_analyst.analyze_market(market_data),
+        quant_analyst.analyze_market(market_data)
+    )
+    
+    # 2. Judge evaluation and consensus
+    judge_decision = market_judge.evaluate_recommendations(recommendations)
+    
+    # 3. Return final decision with reasoning
+    return judge_decision
+```
+
+### 3. **AI Decision Maker** (`src/backend/agent/decision_maker.py`)
 
 Interfaces with large language models for trading decisions:
 - **LLM Integration**: OpenRouter API with multiple model support
@@ -99,7 +179,7 @@ class QuantumDecisionEngine:
 5. Output Contract: Strict JSON format with neural reasoning + systematic decisions
 ```
 
-### 3. **Exchange Integration** (`src/backend/trading/hyperliquid_api.py`)
+### 4. **Exchange Integration** (`src/backend/trading/hyperliquid_api.py`)
 
 Hyperliquid API wrapper with enterprise-grade reliability:
 - **SDK Wrapper**: High-level interface over Hyperliquid SDK
@@ -124,7 +204,7 @@ class HyperliquidAPI:
     async def get_funding_rate()    # Funding rates
 ```
 
-### 4. **GUI Application** (`src/gui/`)
+### 5. **GUI Application** (`src/gui/`)
 
 Modern desktop interface built with NiceGUI:
 - **Real-time Dashboard**: Live performance and market data
@@ -142,7 +222,7 @@ src/gui/
 │   ├── charts.py      # Performance visualizations
 │   └── tables.py      # Data tables and grids
 ├── pages/             # Application pages
-│   ├── dashboard.py   # Main trading dashboard
+│   ├── dashboard.py   # Main trading dashboard with analyst insights
 │   ├── settings.py    # Configuration management
 │   ├── reasoning.py   # AI decision analysis
 │   └── manual.py      # Manual trading interface
@@ -175,11 +255,11 @@ External APIs → Data Aggregation → Indicator Calculation → AI Analysis
 ### 2. **Decision Flow**
 
 ```
-Market Data → AI Context → LLM Analysis → Trade Decision → Order Execution
-     ↓            ↓           ↓             ↓              ↓
+Market Data → Multi-Analyst System → Judge Consensus → Trade Decision → Order Execution
+     ↓              ↓                     ↓               ↓              ↓
 ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-│ Structured  │ │   JSON      │ │ Reasoning   │ │ Validated   │ │ Exchange    │
-│    Data     │ │  Payload    │ │ + Actions   │ │ Parameters  │ │   Orders    │
+│ Structured  │ │ 4 Analyst   │ │ Weighted    │ │ Validated   │ │ Exchange    │
+│    Data     │ │ Opinions    │ │ Consensus   │ │ Parameters  │ │   Orders    │
 └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
 ```
 
@@ -202,6 +282,11 @@ class SystemState:
     # Intelligence
     market_intelligence: List[Dict] = field(default_factory=list)
     neural_reasoning: Dict = field(default_factory=dict)
+    
+    # Multi-Analyst System
+    analyst_recommendations: List[Dict] = field(default_factory=list)
+    judge_decision: Dict = field(default_factory=dict)
+    consensus_confidence: float = 0.0
     
     # Manual Mode
     awaiting_approval: List[Dict] = field(default_factory=list)

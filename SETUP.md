@@ -94,6 +94,9 @@ TRADING_MODE=auto              # auto or manual
 
 # AI model selection
 LLM_MODEL=deepseek/deepseek-chat-v3.1
+
+# Multi-Analyst System (enabled by default)
+USE_MULTI_ANALYST=true         # Enable 4-analyst ensemble system
 ```
 
 ### API Key Setup Guide
@@ -143,6 +146,55 @@ TAAPI_API_KEY=eyJhbGci...your-jwt-token-here
 - 1 request per 15 seconds
 - Supports: BTC, ETH, XRP, LTC, XMR only
 - 500 requests per month
+
+---
+
+## 🧠 Multi-Analyst System Configuration
+
+### Overview
+
+QuantumAlpha Capital features an advanced 4-analyst ensemble system that provides comprehensive market analysis:
+
+- **Technical Analyst**: Price action, chart patterns, technical indicators
+- **ML Analyst**: Machine learning models and AI-based predictions  
+- **Risk Analyst**: Risk management, position sizing, portfolio optimization
+- **Quant Analyst**: Statistical models, market microstructure analysis
+
+### Configuration
+
+```env
+# Enable/disable multi-analyst system
+USE_MULTI_ANALYST=true         # Default: enabled
+
+# Individual analyst weights (optional, advanced users)
+TECHNICAL_WEIGHT=1.0           # Technical analysis weight
+ML_WEIGHT=1.0                  # ML analysis weight  
+RISK_WEIGHT=1.2                # Risk analysis weight (slightly higher)
+QUANT_WEIGHT=1.0               # Quantitative analysis weight
+
+# Judge system settings
+CONSENSUS_THRESHOLD=0.6        # Minimum confidence for trade execution
+DEBATE_ROUNDS=2                # Number of analyst debate rounds
+```
+
+### Monitoring Analyst Performance
+
+The GUI dashboard displays real-time analyst insights:
+
+1. **Individual Recommendations**: Each analyst's current market view
+2. **Confidence Levels**: How certain each analyst is about their recommendation
+3. **Judge Decision**: Final consensus decision with reasoning
+4. **Historical Performance**: Track which analysts perform best over time
+
+### Customization
+
+Advanced users can modify analyst behavior by editing files in `src/backend/analysts/`:
+
+- `technical_analyst.py` - Technical analysis logic
+- `ml_analyst.py` - Machine learning models
+- `risk_analyst.py` - Risk management rules
+- `quant_analyst.py` - Quantitative strategies
+- `market_scanner.py` - Orchestration and judge logic
 
 ---
 
@@ -259,9 +311,10 @@ python -m win32serviceutil InstallService trading_bot_service.py
 ### Real-Time Monitoring
 
 1. **GUI Dashboard**: Real-time performance and positions
-2. **Log Files**: `quantumalpha.log` for system events
-3. **Trade Journal**: `data/diary.jsonl` for trade history
-4. **Performance Metrics**: Sharpe ratio, drawdown, win rate
+2. **Multi-Analyst Intelligence**: Live insights from 4 specialist analysts
+3. **Log Files**: `quantumalpha.log` for system events
+4. **Trade Journal**: `data/diary.jsonl` for trade history
+5. **Performance Metrics**: Sharpe ratio, drawdown, win rate
 
 ### Daily Maintenance
 

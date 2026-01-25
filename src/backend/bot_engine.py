@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Callable, Any
 
 from src.backend.agent.decision_maker import QuantumDecisionEngine
+from src.backend.analysts.market_scanner import MarketScanner
 from src.backend.config_loader import CONFIG
 from src.backend.indicators.taapi_client import TAAPIClient
 from src.backend.models.trade_proposal import TradeProposal
@@ -35,6 +36,7 @@ class SystemState:
     market_intelligence: List[Dict] = field(default_factory=list)  # Market data for dashboard
     awaiting_approval: List[Dict] = field(default_factory=list)  # Pending trade proposals (manual mode)
     neural_reasoning: Dict = field(default_factory=dict)
+    multi_analyst_results: Dict = field(default_factory=dict)  # Multi-analyst system results
     last_sync: str = ""
     system_error: Optional[str] = None
     cycle_count: int = 0
@@ -85,6 +87,7 @@ class QuantumMarketProcessor:
         self.taapi = TAAPIClient()
         self.hyperliquid = HyperliquidAPI()
         self.neural_engine = QuantumDecisionEngine()
+        self.market_scanner = MarketScanner()  # Multi-analyst system
 
         # System state
         self.system_state = SystemState()
@@ -135,6 +138,11 @@ class QuantumMarketProcessor:
 
         self._execution_task = asyncio.create_task(self._quantum_processing_loop())
         self.logger.info(f"Processor initialized - Instruments: {self.instruments}, Timeframe: {self.timeframe}")
+        
+        # Send activity event for GUI
+        if self.on_system_alert:
+            self.on_system_alert(f"🚀 QuantumAlpha initialized - Trading {', '.join(self.instruments)} on {self.timeframe}")
+            
         self._notify_system_update()
 
     async def terminate_processing(self):
@@ -423,39 +431,82 @@ class QuantumMarketProcessor:
                         f.write(context + "\n")
 
                     # ===== PHASE 10: Get Neural Decision =====
-                    decisions = await asyncio.to_thread(
-                        self.neural_engine.synthesize_market_decisions, self.instruments, context
-                    )
-
-                    # Validate and retry if needed
-                    if not isinstance(decisions, dict) or 'trade_decisions' not in decisions:
-                        self.logger.warning("Invalid decision format, retrying with strict prefix...")
-                        strict_context = (
-                            "Return ONLY the JSON object per the schema. "
-                            "No markdown, no explanation.\n\n" + context
-                        )
-                        decisions = await asyncio.to_thread(
-                            self.neural_engine.synthesize_market_decisions, self.instruments, strict_context
-                        )
-
-                    # Check for all-hold with parse errors
-                    trade_decisions = decisions.get('trade_decisions', [])
-                    if all(
-                        d.get('action') == 'hold' and 'parse error' in d.get('rationale', '').lower()
-                        for d in trade_decisions
-                    ):
-                        self.logger.warning("All holds with parse errors, retrying...")
+                    # Option 1: Use multi-analyst system (new)
+                    if CONFIG.get("use_multi_analyst", False):
+                        self.logger.info("Using multi-analyst system for decision making...")
+                        
+                        # Send activity event for GUI
+                        if self.on_system_alert:
+                            self.on_system_alert("🧠 Multi-analyst system analyzing market...")
+                        
+                        decisions = await self.market_scanner.analyze_market(context_payload, self.instruments)
+                        
+                        # Extract final recommendation from judge
+                        final_rec = decisions.get("final_recommendation")
+                        if final_rec:
+                            # Convert to original format for compatibility
+                            decisions = {
+                                "reasoning": decisions.get("judge_decision", {}).get("reasoning", "Multi-analyst decision"),
+                                "trade_decisions": [final_rec]
+                            }
+                        else:
+                            # No recommendation from judge, use HOLD
+                            decisions = {
+                                "reasoning": "Multi-analyst system recommends HOLD",
+                                "trade_decisions": [{
+                                    "asset": asset,
+                                    "action": "hold",
+                                    "allocation_usd": 0,
+                                    "tp_price": None,
+                                    "sl_price": None,
+                                    "exit_plan": "",
+                                    "rationale": "No consensus from analysts"
+                                } for asset in self.instruments]
+                            }
+                        
+                        # Store full multi-analyst results
+                        self.system_state.neural_reasoning = decisions
+                        # Store the full decisions object which contains analyst_results
+                        self.system_state.multi_analyst_results = decisions
+                        
+                        # Extract trade decisions for processing
+                        trade_decisions = decisions.get('trade_decisions', [])
+                        
+                    else:
+                        # Option 2: Use original neural engine (default)
                         decisions = await asyncio.to_thread(
                             self.neural_engine.synthesize_market_decisions, self.instruments, context
                         )
+
+                        # Validate and retry if needed
+                        if not isinstance(decisions, dict) or 'trade_decisions' not in decisions:
+                            self.logger.warning("Invalid decision format, retrying with strict prefix...")
+                            strict_context = (
+                                "Return ONLY the JSON object per the schema. "
+                                "No markdown, no explanation.\n\n" + context
+                            )
+                            decisions = await asyncio.to_thread(
+                                self.neural_engine.synthesize_market_decisions, self.instruments, strict_context
+                            )
+
+                        # Check for all-hold with parse errors
                         trade_decisions = decisions.get('trade_decisions', [])
+                        if all(
+                            d.get('action') == 'hold' and 'parse error' in d.get('rationale', '').lower()
+                            for d in trade_decisions
+                        ):
+                            self.logger.warning("All holds with parse errors, retrying...")
+                            decisions = await asyncio.to_thread(
+                                self.neural_engine.synthesize_market_decisions, self.instruments, context
+                            )
+                            trade_decisions = decisions.get('trade_decisions', [])
+
+                        self.system_state.neural_reasoning = decisions
 
                     # Extract reasoning
                     reasoning = decisions.get('reasoning', '')
                     if reasoning:
-                        self.logger.info(f"LLM Reasoning: {reasoning[:200]}...")
-
-                    self.system_state.neural_reasoning = decisions
+                        self.logger.info(f"Decision Reasoning: {reasoning[:200]}...")
 
                     # ===== PHASE 11: Execute Trades or Create Proposals =====
                     for decision in trade_decisions:
@@ -527,6 +578,10 @@ class QuantumMarketProcessor:
                                         order_result = await self.hyperliquid.place_sell_order(instrument, amount)
 
                                     self.logger.info(f"Executed {action} {instrument}: {amount:.6f} @ {current_price}")
+                                    
+                                    # Send activity event for GUI
+                                    if self.on_system_alert:
+                                        self.on_system_alert(f"Executed {action.upper()} {instrument}: {amount:.4f} @ ${current_price:,.2f}")
 
                                     # Wait and check fills
                                     await asyncio.sleep(1)
@@ -619,6 +674,11 @@ class QuantumMarketProcessor:
 
                         elif action == 'hold':
                             self.logger.info(f"{instrument}: HOLD - {rationale}")
+                            
+                            # Send activity event for GUI
+                            if self.on_system_alert:
+                                self.on_system_alert(f"{instrument}: HOLD - {rationale[:50]}...")
+                                
                             self._write_journal_entry({
                                 'timestamp': datetime.now(timezone.utc).isoformat(),
                                 'asset': instrument,

@@ -7,11 +7,101 @@ This document provides a comprehensive overview of the AI-powered trading strate
 ## 🎯 Core Trading Philosophy
 
 The agent operates on a **profit-maximization framework** that combines:
+- **Multi-Analyst Intelligence** (4-specialist ensemble system with judge consensus)
 - **Bidirectional trading** (profit from both up and down movements)
 - **Multi-timeframe analysis** (5m for entries, 4h for trend confirmation)
 - **AI-driven decision making** with sophisticated reasoning
 - **Aggressive but calculated risk management**
 - **High-frequency execution** with sub-second order placement
+
+---
+
+## 🧠 Multi-Analyst System Architecture
+
+### Overview
+
+QuantumAlpha Capital employs a sophisticated 4-analyst ensemble system that provides comprehensive market analysis from multiple perspectives:
+
+```
+Market Data → [Technical] [ML] [Risk] [Quant] → Judge → Final Decision
+                ↓        ↓     ↓      ↓         ↓
+              Price    AI    Risk   Stats    Consensus
+             Action  Models  Mgmt  Models    Reasoning
+```
+
+### Analyst Specializations
+
+#### 1. **Technical Analyst**
+- **Focus**: Price action, chart patterns, technical indicators
+- **Strengths**: Trend identification, support/resistance, momentum signals
+- **Tools**: EMAs, MACD, RSI, ATR, Bollinger Bands, Fibonacci levels
+- **Timeframes**: 5m for entries, 4h for trend confirmation
+
+#### 2. **ML Analyst** 
+- **Focus**: Machine learning models and AI-based predictions
+- **Strengths**: Pattern recognition, predictive modeling, sentiment analysis
+- **Tools**: Neural networks, regression models, classification algorithms
+- **Data Sources**: Price patterns, volume profiles, market microstructure
+
+#### 3. **Risk Analyst**
+- **Focus**: Risk management, position sizing, portfolio optimization
+- **Strengths**: Drawdown protection, volatility assessment, correlation analysis
+- **Tools**: VaR models, Monte Carlo simulation, portfolio theory
+- **Metrics**: Sharpe ratio, maximum drawdown, risk-adjusted returns
+
+#### 4. **Quant Analyst**
+- **Focus**: Statistical models, market microstructure, quantitative signals
+- **Strengths**: Statistical arbitrage, mean reversion, momentum factors
+- **Tools**: Statistical tests, regression analysis, factor models
+- **Approach**: Data-driven, backtested strategies, systematic execution
+
+### Judge System
+
+The **Market Judge** evaluates all analyst recommendations and determines the final consensus:
+
+#### Decision Process
+1. **Confidence Weighting**: Higher confidence recommendations get more weight
+2. **Historical Performance**: Analysts with better recent performance get priority
+3. **Market Condition Matching**: Analysts suited to current conditions get emphasis
+4. **Risk Adjustment**: Risk analyst input heavily weighted for position sizing
+5. **Consensus Building**: Majority agreement required for high-conviction trades
+
+#### Judge Decision Criteria
+```python
+def evaluate_recommendations(recommendations):
+    """
+    Judge evaluation process:
+    - Technical + ML agreement = High conviction trend trades
+    - Risk + Quant agreement = Conservative, well-sized positions  
+    - All 4 agreement = Maximum conviction trades
+    - Split decisions = Reduced position size or no trade
+    """
+    consensus_strength = calculate_agreement_level(recommendations)
+    risk_adjustment = risk_analyst.position_sizing_recommendation()
+    market_conditions = assess_current_market_regime()
+    
+    return final_decision_with_reasoning()
+```
+
+### Multi-Analyst Strategy Integration
+
+#### Momentum Strategy (Technical + ML Focus)
+- **Technical Analyst**: Identifies trend breakouts and momentum signals
+- **ML Analyst**: Confirms patterns and predicts continuation probability
+- **Risk Analyst**: Sizes positions based on volatility and correlation
+- **Quant Analyst**: Validates signals with statistical significance tests
+
+#### Scalping Strategy (All Analysts)
+- **Technical Analyst**: Provides precise entry/exit levels
+- **ML Analyst**: Predicts short-term price movements
+- **Risk Analyst**: Ensures tight risk controls and quick exits
+- **Quant Analyst**: Optimizes execution timing and slippage
+
+#### Swing Strategy (Risk + Quant Focus)
+- **Technical Analyst**: Identifies major trend changes and levels
+- **ML Analyst**: Assesses probability of trend continuation
+- **Risk Analyst**: Manages longer-term position risk and correlation
+- **Quant Analyst**: Provides statistical edge and backtested validation
 
 ---
 
@@ -203,7 +293,115 @@ Profit from high volatility periods using breakout and mean reversion techniques
 
 ---
 
-## 🎛️ AI Decision-Making Process
+## 🎛️ Multi-Analyst Decision-Making Process
+
+### 1. **Data Ingestion**
+- Real-time price data from Hyperliquid
+- Technical indicators from TAAPI.io
+- Account state and position information
+- Market microstructure (funding, OI, volume)
+
+### 2. **Parallel Analyst Evaluation**
+Each analyst independently analyzes the market:
+
+```python
+# Simultaneous analysis by all 4 analysts
+async def get_multi_analyst_decision(market_data):
+    recommendations = await asyncio.gather(
+        technical_analyst.analyze_market(market_data),
+        ml_analyst.analyze_market(market_data),
+        risk_analyst.analyze_market(market_data),
+        quant_analyst.analyze_market(market_data)
+    )
+    
+    # Judge evaluates and builds consensus
+    judge_decision = market_judge.evaluate_recommendations(recommendations)
+    return judge_decision
+```
+
+### 3. **Analyst Reasoning Process**
+
+#### Technical Analyst Flow
+```
+1. Trend Analysis (EMAs, price action)
+2. Momentum Assessment (MACD, RSI)
+3. Support/Resistance Identification
+4. Entry/Exit Level Determination
+5. Confidence Rating (0-100%)
+```
+
+#### ML Analyst Flow
+```
+1. Pattern Recognition (historical similarities)
+2. Predictive Modeling (price direction probability)
+3. Sentiment Analysis (market psychology)
+4. Feature Engineering (derived indicators)
+5. Model Confidence Score (0-100%)
+```
+
+#### Risk Analyst Flow
+```
+1. Portfolio Risk Assessment (current exposure)
+2. Volatility Analysis (ATR, realized vol)
+3. Correlation Impact (cross-asset effects)
+4. Position Sizing Calculation (Kelly criterion)
+5. Risk-Adjusted Recommendation (0-100%)
+```
+
+#### Quant Analyst Flow
+```
+1. Statistical Significance Testing
+2. Backtesting Validation (historical performance)
+3. Factor Analysis (momentum, mean reversion)
+4. Market Regime Classification
+5. Quantitative Edge Assessment (0-100%)
+```
+
+### 4. **Judge Consensus Building**
+
+The judge evaluates all recommendations using:
+
+#### Weighted Scoring System
+```python
+def calculate_consensus_score(recommendations):
+    weights = {
+        'technical': 1.0,
+        'ml': 1.0, 
+        'risk': 1.2,  # Slightly higher weight for risk management
+        'quant': 1.0
+    }
+    
+    # Adjust weights based on recent performance
+    for analyst, weight in weights.items():
+        recent_performance = get_recent_performance(analyst)
+        weights[analyst] *= (1 + recent_performance)
+    
+    # Calculate weighted consensus
+    consensus = sum(rec.confidence * weights[rec.analyst] 
+                   for rec in recommendations) / sum(weights.values())
+    
+    return consensus
+```
+
+#### Decision Thresholds
+- **High Conviction (80%+)**: All analysts agree, maximum position size
+- **Medium Conviction (60-80%)**: Majority agreement, standard position size
+- **Low Conviction (40-60%)**: Mixed signals, reduced position size
+- **No Trade (<40%)**: Insufficient consensus, wait for better setup
+
+### 5. **Final Decision Output**
+
+The judge produces a comprehensive decision with:
+- **Action**: Buy/Sell/Hold with detailed reasoning
+- **Consensus Strength**: Agreement level among analysts (0-100%)
+- **Position Size**: Risk-adjusted allocation recommendation
+- **Entry Strategy**: Optimal execution approach
+- **Risk Management**: Stop-loss and take-profit levels
+- **Individual Analyst Views**: Full transparency of each opinion
+
+---
+
+## 🎛️ Traditional AI Decision-Making Process (Fallback)
 
 ### 1. **Data Ingestion**
 - Real-time price data from Hyperliquid
@@ -216,7 +414,7 @@ Profit from high volatility periods using breakout and mean reversion techniques
 - **4h Chart**: Trend confirmation and major levels
 - **Alignment Check**: Ensure timeframes agree for high conviction
 
-### 3. **AI Reasoning Process**
+### 3. **Single AI Reasoning Process** (when multi-analyst disabled)
 ```
 1. Market Structure Analysis
    ├── Trend identification (EMAs, price action)

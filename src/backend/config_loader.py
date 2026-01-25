@@ -87,6 +87,8 @@ CONFIG = {
     # Neural reasoning capabilities
     "reasoning_enabled": _get_bool("REASONING_ENABLED", False),
     "reasoning_effort": _get_env("REASONING_EFFORT", "high"),
+    # Multi-analyst system
+    "use_multi_analyst": _get_bool("USE_MULTI_ANALYST", False),
     # Provider routing
     "provider_config": _get_json("PROVIDER_CONFIG"),
     "provider_quantizations": _get_list("PROVIDER_QUANTIZATIONS"),

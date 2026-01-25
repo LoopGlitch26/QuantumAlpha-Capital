@@ -1,6 +1,6 @@
 # QuantumAlpha Capital
 
-A Python-based algorithmic trading platform for cryptocurrency perpetual futures on Hyperliquid exchange. Features AI-powered market analysis, real-time technical indicators, and automated trade execution with risk management.
+A Python-based algorithmic multi-analyst trading platform for cryptocurrency perpetual futures on Hyperliquid exchange. Features AI-powered market analysis, real-time technical indicators, and automated trade execution with risk management.
 
 <img width="1512" height="982" alt="Screenshot 2026-01-19 at 7 20 01 AM" src="https://github.com/user-attachments/assets/09a6b381-292f-4f55-98e7-3634783d3b95" />
 <img width="1512" height="982" alt="Screenshot 2026-01-19 at 7 20 08 AM" src="https://github.com/user-attachments/assets/a4778bd8-bb18-4abc-b86f-6c27dd036eeb" />
@@ -10,10 +10,11 @@ A Python-based algorithmic trading platform for cryptocurrency perpetual futures
 ## Features
 
 - **Automated Trading**: Systematic trade execution on Hyperliquid perpetual futures
+- **Multi-Analyst AI System**: 4-specialist ensemble (Technical, ML, Risk, Quant) with judge consensus
 - **AI Integration**: Multiple LLM providers (OpenRouter) for market analysis and decision making
 - **Technical Analysis**: Real-time RSI, MACD, EMA indicators via TAAPI.io
 - **Risk Management**: Position sizing, stop-loss, take-profit automation
-- **GUI Dashboard**: Real-time portfolio monitoring with live charts
+- **GUI Dashboard**: Real-time portfolio monitoring with live charts and analyst insights
 - **Multi-Asset Support**: BTC, ETH, LTC perpetual futures trading
 
 ## Architecture
@@ -21,6 +22,7 @@ A Python-based algorithmic trading platform for cryptocurrency perpetual futures
 ### Core Components
 
 - **Market Processor** (`src/backend/bot_engine.py`): Main trading loop with 5-minute cycles
+- **Multi-Analyst System** (`src/backend/analysts/`): 4-specialist ensemble with judge consensus
 - **Decision Engine** (`src/backend/agent/decision_maker.py`): AI-powered trade signal generation
 - **Exchange API** (`src/backend/trading/hyperliquid_api.py`): Hyperliquid integration
 - **GUI Interface** (`src/gui/`): NiceGUI-based dashboard with real-time updates
@@ -29,10 +31,21 @@ A Python-based algorithmic trading platform for cryptocurrency perpetual futures
 ### Data Flow
 
 ```
-TAAPI.io → Technical Indicators → AI Analysis → Trade Signals → Hyperliquid Execution
-    ↓              ↓                    ↓            ↓              ↓
-Market Data → Portfolio State → GUI Dashboard → User Interface → Trade Management
+TAAPI.io → Technical Indicators → Multi-Analyst System → Judge Consensus → Trade Signals → Hyperliquid Execution
+    ↓              ↓                       ↓                    ↓              ↓              ↓
+Market Data → Portfolio State → Analyst Insights → GUI Dashboard → User Interface → Trade Management
 ```
+
+### Multi-Analyst System
+
+The platform features a sophisticated 4-analyst ensemble system:
+
+- **Technical Analyst**: Price action, chart patterns, technical indicators
+- **ML Analyst**: Machine learning models and AI-based predictions  
+- **Risk Analyst**: Risk management, position sizing, portfolio optimization
+- **Quant Analyst**: Statistical models, market microstructure analysis
+
+Each analyst provides independent recommendations which are evaluated by a **Judge** system that determines the final consensus decision based on confidence levels and market conditions.
 
 ## Installation
 
@@ -77,6 +90,7 @@ INSTRUMENTS=BTC ETH LTC                    # Assets to trade
 ANALYSIS_TIMEFRAME=5m                      # Analysis frequency
 EXECUTION_MODE=systematic                  # systematic/manual
 AI_MODEL=deepseek/deepseek-chat-v3.1      # AI model selection
+USE_MULTI_ANALYST=true                     # Enable 4-analyst ensemble system
 
 # API Keys
 HYPERLIQUID_PRIVATE_KEY=your_key          # Trading wallet private key
@@ -123,6 +137,7 @@ HYPERLIQUID_NETWORK=mainnet               # mainnet/testnet
 ### Components
 
 - **Portfolio Metrics**: Balance, PnL, Sharpe ratio, active positions
+- **Multi-Analyst Intelligence**: Real-time insights from 4 specialist analysts with judge consensus
 - **Technical Charts**: Price, RSI, MACD with real-time updates
 - **Position Management**: Open positions with risk metrics
 - **Trade Proposals**: AI-generated recommendations with approval workflow
@@ -142,6 +157,7 @@ HYPERLIQUID_NETWORK=mainnet               # mainnet/testnet
 src/
 ├── backend/
 │   ├── agent/           # AI decision making
+│   ├── analysts/        # Multi-analyst ensemble system
 │   ├── core/            # Portfolio optimization
 │   ├── indicators/      # Technical analysis
 │   ├── trading/         # Exchange integration

@@ -579,6 +579,29 @@ def create_dashboard(agent_service: AgentService, state_manager: StateManager):
         try:
             state = state_manager.get_state()
 
+            # Update activity feed with recent events
+            recent_events = agent_service.get_recent_events(limit=6)
+            if recent_events:
+                activity_log.clear()
+                for event in recent_events[-6:]:  # Show last 6 events
+                    timestamp = event.get('time', '')
+                    message = event.get('message', '')
+                    level = event.get('level', 'info')
+                    
+                    # Format message with timestamp and appropriate icon
+                    if level == 'error':
+                        icon = '❌'
+                    elif level == 'warning':
+                        icon = '⚠️'
+                    elif 'BUY' in message or 'SELL' in message:
+                        icon = '📈'
+                    elif 'HOLD' in message:
+                        icon = '⏸️'
+                    else:
+                        icon = '📊'
+                    
+                    activity_log.push(f'[{timestamp}] {icon} {message}')
+
             # Update top metrics - restored original 4 metrics
             balance_value.text = f'${state.account_balance:,.2f}'
 
@@ -1108,3 +1131,166 @@ def create_dashboard(agent_service: AgentService, state_manager: StateManager):
 
     # Initial update
     ui.timer(0.5, update_dashboard)
+
+    # ===== MULTI-ANALYST SECTION =====
+    # Add analyst section at the bottom of dashboard
+    with ui.card().classes('w-full p-4 mt-6'):
+        with ui.row().classes('w-full items-center justify-between mb-4'):
+            ui.label('Multi-Analyst Intelligence').classes('text-2xl font-bold text-white')
+            multi_analyst_status = ui.badge('Disabled', color='gray').classes('text-sm')
+
+        # Analyst Cards Row
+        with ui.row().classes('w-full gap-4 mb-4'):
+            # Technical Analyst
+            with ui.card().classes('flex-1 p-3 bg-gradient-to-br from-blue-800 to-blue-900 border border-blue-600'):
+                with ui.row().classes('items-center gap-2 mb-2'):
+                    ui.label('📈').classes('text-xl')
+                    ui.label('Technical Analyst').classes('text-lg font-bold text-white')
+                
+                ui.label('Price action, indicators, chart patterns').classes('text-sm text-blue-100 mb-2')
+                technical_recommendation = ui.label('No recommendation').classes('text-xs text-blue-200')
+
+            # ML Analyst
+            with ui.card().classes('flex-1 p-3 bg-gradient-to-br from-purple-800 to-purple-900 border border-purple-600'):
+                with ui.row().classes('items-center gap-2 mb-2'):
+                    ui.label('🤖').classes('text-xl')
+                    ui.label('ML Analyst').classes('text-lg font-bold text-white')
+                
+                ui.label('Machine learning and AI-based analysis').classes('text-sm text-purple-100 mb-2')
+                ml_recommendation = ui.label('No recommendation').classes('text-xs text-purple-200')
+
+            # Risk Analyst
+            with ui.card().classes('flex-1 p-3 bg-gradient-to-br from-red-800 to-red-900 border border-red-600'):
+                with ui.row().classes('items-center gap-2 mb-2'):
+                    ui.label('🛡️').classes('text-xl')
+                    ui.label('Risk Analyst').classes('text-lg font-bold text-white')
+                
+                ui.label('Risk management and position sizing').classes('text-sm text-red-100 mb-2')
+                risk_recommendation = ui.label('No recommendation').classes('text-xs text-red-200')
+
+            # Quant Analyst
+            with ui.card().classes('flex-1 p-3 bg-gradient-to-br from-green-800 to-green-900 border border-green-600'):
+                with ui.row().classes('items-center gap-2 mb-2'):
+                    ui.label('📊').classes('text-xl')
+                    ui.label('Quant Analyst').classes('text-lg font-bold text-white')
+                
+                ui.label('Statistical models and microstructure').classes('text-sm text-green-100 mb-2')
+                quant_recommendation = ui.label('No recommendation').classes('text-xs text-green-200')
+
+        # Judge Decision
+        with ui.card().classes('w-full p-4 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600'):
+            with ui.row().classes('w-full items-center justify-between mb-3'):
+                ui.label('Judge Decision').classes('text-xl font-bold text-white')
+                judge_winner = ui.badge('None', color='gray').classes('text-sm')
+
+            judge_reasoning_text = ui.label('Multi-analyst system not active').classes('text-gray-400')
+
+        # Controls
+        with ui.row().classes('w-full items-center gap-4 mt-4'):
+            multi_analyst_toggle = ui.switch('Enable Multi-Analyst Mode', value=False)
+            multi_analyst_toggle.classes('text-white')
+            
+            ui.label('Restart agent after enabling to take effect').classes('text-sm text-gray-400')
+
+    async def update_multi_analyst_display():
+        """Update multi-analyst display with current data"""
+        try:
+            state = state_manager.get_state()
+            
+            # Check if multi-analyst is enabled
+            from src.backend.config_loader import CONFIG
+            is_enabled = CONFIG.get("use_multi_analyst", False)
+            
+            if is_enabled:
+                multi_analyst_status.text = 'Active'
+                multi_analyst_status.color = 'green'
+                multi_analyst_toggle.value = True
+                
+                # Update analyst recommendations
+                multi_results = getattr(state, 'multi_analyst_results', {})
+                
+                if multi_results and 'analyst_results' in multi_results:
+                    analyst_results = multi_results['analyst_results']
+                    
+                    # Technical Analyst
+                    tech_result = analyst_results.get('technical', {})
+                    if 'analysis' in tech_result:
+                        rec = tech_result['analysis'].get('recommendation', {})
+                        action = rec.get('action', 'HOLD')
+                        confidence = rec.get('confidence', 0)
+                        technical_recommendation.text = f'{action} ({confidence}%)'
+                        technical_recommendation.classes(f'text-xs text-{"green" if action == "BUY" else "red" if action == "SELL" else "blue"}-200')
+                    elif 'error' in tech_result:
+                        technical_recommendation.text = 'Analysis error'
+                        technical_recommendation.classes('text-xs text-red-200')
+                    
+                    # ML Analyst
+                    ml_result = analyst_results.get('ml', {})
+                    if 'analysis' in ml_result:
+                        rec = ml_result['analysis'].get('recommendation', {})
+                        action = rec.get('action', 'HOLD')
+                        confidence = rec.get('confidence', 0)
+                        ml_recommendation.text = f'{action} ({confidence}%)'
+                        ml_recommendation.classes(f'text-xs text-{"green" if action == "BUY" else "red" if action == "SELL" else "purple"}-200')
+                    elif 'error' in ml_result:
+                        ml_recommendation.text = 'Analysis error'
+                        ml_recommendation.classes('text-xs text-red-200')
+                    
+                    # Risk Analyst
+                    risk_result = analyst_results.get('risk', {})
+                    if 'analysis' in risk_result:
+                        rec = risk_result['analysis'].get('recommendation', {})
+                        action = rec.get('action', 'HOLD')
+                        confidence = rec.get('confidence', 0)
+                        risk_recommendation.text = f'{action} ({confidence}%)'
+                        risk_recommendation.classes(f'text-xs text-{"green" if action == "BUY" else "red" if action == "SELL" else "red"}-200')
+                    elif 'error' in risk_result:
+                        risk_recommendation.text = 'Analysis error'
+                        risk_recommendation.classes('text-xs text-red-200')
+                    
+                    # Quant Analyst
+                    quant_result = analyst_results.get('quant', {})
+                    if 'analysis' in quant_result:
+                        rec = quant_result['analysis'].get('recommendation', {})
+                        action = rec.get('action', 'HOLD')
+                        confidence = rec.get('confidence', 0)
+                        quant_recommendation.text = f'{action} ({confidence}%)'
+                        quant_recommendation.classes(f'text-xs text-{"green" if action == "BUY" else "red" if action == "SELL" else "green"}-200')
+                    elif 'error' in quant_result:
+                        quant_recommendation.text = 'Analysis error'
+                        quant_recommendation.classes('text-xs text-red-200')
+                
+                # Update judge decision
+                if multi_results and 'judge_decision' in multi_results:
+                    judge_decision = multi_results['judge_decision']
+                    winner = judge_decision.get('winner', 'NONE')
+                    reasoning = judge_decision.get('reasoning', 'No reasoning provided')
+                    
+                    judge_winner.text = winner.upper()
+                    judge_winner.color = 'green' if winner != 'NONE' else 'gray'
+                    judge_reasoning_text.text = reasoning[:200] + '...' if len(reasoning) > 200 else reasoning
+                    judge_reasoning_text.classes('text-white')
+                else:
+                    judge_reasoning_text.text = 'Waiting for analyst decisions...'
+                    judge_reasoning_text.classes('text-gray-400')
+            else:
+                multi_analyst_status.text = 'Disabled'
+                multi_analyst_status.color = 'gray'
+                multi_analyst_toggle.value = False
+                
+                # Reset displays
+                technical_recommendation.text = 'Multi-analyst disabled'
+                ml_recommendation.text = 'Multi-analyst disabled'
+                risk_recommendation.text = 'Multi-analyst disabled'
+                quant_recommendation.text = 'Multi-analyst disabled'
+                judge_reasoning_text.text = 'Enable multi-analyst mode to see analysis'
+                judge_reasoning_text.classes('text-gray-400')
+                
+        except Exception as e:
+            print(f"Error updating multi-analyst display: {e}")
+
+    # Add multi-analyst update to existing timers
+    ui.timer(5.0, update_multi_analyst_display)
+    
+    # Initial multi-analyst update
+    ui.timer(1.5, update_multi_analyst_display)
